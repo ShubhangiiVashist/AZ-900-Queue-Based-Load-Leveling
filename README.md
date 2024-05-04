@@ -1,4 +1,4 @@
-#Queue-Based Load Leveling pattern implementation 
+Queue-Based Load Leveling pattern implementation 
 
 **The aim of a Queue-Based Leveling pattern is to reduce memory consumption by dequeuing records only when there is capacity to process them.**
 
