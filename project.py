@@ -12,7 +12,7 @@ import ast
 import uuid
 import jwt
 import time
-
+#start code
 def create_storage_account_and_container():
     #Checking the availability of the storage group name
     var= False
