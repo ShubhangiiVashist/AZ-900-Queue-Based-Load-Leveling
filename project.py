@@ -1,4 +1,3 @@
-
 #Importing necessary libraries 
 from azure.mgmt.authorization import AuthorizationManagementClient
 from azure.mgmt.authorization.models import RoleAssignmentCreateParameters
@@ -13,16 +12,18 @@ import uuid
 import jwt
 import time
 
-#Creating a storage container with a unique name
-def create_storage_account_and_container(resource_group):
+#Creating a storage account with a unique name
+def create_storage_account_and_container(resource_group,credential,subscription_id):
+     #Setting up storage management client
+    storage_client = StorageManagementClient(credential,subscription_id)
     #Checking the availability of the storage group name
     var= False
     while var != True:
-        Base_name = f'{'mystorageaccount'}{random.randint(1,100)}'
+        Base_name = f'{'teststoreaccount'}{random.randint(1,100)}'
         result = storage_client.storage_accounts.check_name_availability({'name':Base_name})
         var = result.name_available
 
-    #Creating storage group
+    #Creating storage group with a unique name
     poller = storage_client.storage_accounts.begin_create(
         resource_group_name = resource_group, account_name = Base_name , 
         parameters = { 'location': 'eastus', 'kind': 'StorageV2' , 'sku' : {'name' : 'Standard_LRS'}
@@ -33,19 +34,23 @@ def create_storage_account_and_container(resource_group):
     storage_account =  poller_Results.name
 
     #Creating a storage Container for blob
+    container_name = 'my-blob-container'
     containter = storage_client.blob_containers.create(
-    resource_group_name = resource_group,
-    account_name = storage_account,
-    container_name = container_name,
-    blob_container = {"metadata": {
-            "category": "documents",
-            "owner": "floating nimbus limited"}
-                    }
+        resource_group_name = resource_group,
+        account_name = storage_account,
+        container_name = container_name,
+        blob_container = {"metadata": 
+                          {
+                "category": "documents",
+                "owner": "floating nimbus limited"
+                          }
+                        }
     )
+    #Assigning relevant roles to storage accounts
     role_assignment(storage_account)
     return storage_account
 
-#Assigning relevant roles to the storage account
+
 def role_assignment(storage_account):
     new_guid_1 = uuid.uuid4()
     guid_str_1 = str(new_guid_1)
@@ -54,24 +59,24 @@ def role_assignment(storage_account):
     new_guid_3 = uuid.uuid4()
     guid_str_3 = str(new_guid_3)
     credential = DefaultAzureCredential()
-    
+
+    #Setting up authorization management client
     authorization_client = AuthorizationManagementClient(credential, subscription_id)
-    
+    principal_id = input("enter principle ID")  #principle_id is the object_id
     scope = f"/subscriptions/{subscription_id}/resourceGroups/{resource_group}/providers/Microsoft.Storage/storageAccounts/{storage_account}"
 
-    #principle_id is the object_id
     role_assignment_params = RoleAssignmentCreateParameters(
-        principal_id = '95fc57ec-1f99-4957-9a20-c59593b896bb' ,
+        principal_id = principal_id ,
         role_definition_id="/subscriptions/{subscription_id}/providers/Microsoft.Authorization/roleDefinitions/b7e6dc6d-f1e8-4753-8033-0f276bb0955b",
         scope=scope
     )
     role_assignment_params_2 = RoleAssignmentCreateParameters(
-        principal_id = '95fc57ec-1f99-4957-9a20-c59593b896bb' ,
+        principal_id = principal_id ,
         role_definition_id="/subscriptions/{subscription_id}/providers/Microsoft.Authorization/roleDefinitions/974c5e8b-45b9-4653-ba55-5f855dd0fb88",
         scope=scope
     )
     role_assignment_params_3 = RoleAssignmentCreateParameters(
-        principal_id = '95fc57ec-1f99-4957-9a20-c59593b896bb' ,
+        principal_id = principal_id ,
         role_definition_id="/subscriptions/{subscription_id}/providers/Microsoft.Authorization/roleDefinitions/0a9a7e1f-b9d0-4cc4-a60d-0319b160aaa3",
         scope=scope
     )
@@ -116,7 +121,7 @@ def queue_upload(storage_account,credential):
     #Queue client setup
     queue_client= QueueClient(
         account_url= "https://"+storage_account+".queue.core.windows.net/", 
-        queue_name = 'floating-queue' ,credential= credential )
+        queue_name = 'my-queue' ,credential= credential )
     #Create a Queue
     queue_client.create_queue()
     #Enqueue
@@ -130,10 +135,10 @@ def queue_upload(storage_account,credential):
 def dequeue(storage_account,credential,connection_string):
     #Get messsage off the queue
     table_client  = TableServiceClient.from_connection_string(conn_str=connection_string)
-    table = table_client.create_table(table_name = "Nimbustable01")
+    table = table_client.create_table(table_name = "Mytable01")
     queue_client= QueueClient(
             account_url= "https://"+storage_account+".queue.core.windows.net/", 
-            queue_name = 'floating-queue' ,credential= credential )
+            queue_name = 'my-queue' ,credential= credential )
     while queue_client.get_queue_properties().approximate_message_count != 0:
         message = queue_client.receive_message()
         if message != None: 
@@ -156,18 +161,15 @@ def job_processor(message,connection_string,table):
 
 if __name__ == "__main__":
     subscription_id = input("Enter your subscription ID")
-    resource_group = input("Enter your resource group")
-    container_name = 'my-blob-container'
-    #Setting up storage management client
+    resource_group = input("Enter your resource group name")
+
+    #Setting up credentials
     credential = AzureCliCredential()
-    storage_client = StorageManagementClient(credential,subscription_id)
-    #Create a storage account for your Organisation 
-    storage_account = create_storage_account_and_container(resource_group)
+    #Create a storage account 
+    storage_account = create_storage_account_and_container(resource_group,credential,subscription_id)
+    
     connection = input("enter key")
     connection_string = input("enter string")
     queue_upload(storage_account,connection)
     dequeue(storage_account,connection,connection_string)
     
-  
-    
-  
