@@ -12,7 +12,8 @@ import ast
 import uuid
 import jwt
 import time
-#start code
+
+#Creating a storage container with a unique name
 def create_storage_account_and_container():
     #Checking the availability of the storage group name
     var= False
@@ -31,8 +32,7 @@ def create_storage_account_and_container():
     poller_Results = poller.result()
     storage_account =  poller_Results.name
 
-    #Creating Container
-    
+    #Creating a storage Container for blob
     containter = storage_client.blob_containers.create(
     resource_group_name = resource_group,
     account_name = storage_account,
@@ -45,6 +45,7 @@ def create_storage_account_and_container():
     
     return storage_account
 
+#Assigning relevant roles to the storage account
 def role_assignment(storage_account):
     new_guid_1 = uuid.uuid4()
     guid_str_1 = str(new_guid_1)
@@ -79,13 +80,14 @@ def role_assignment(storage_account):
     role_assignment_1 = authorization_client.role_assignments.create(scope=scope, role_assignment_name = guid_str_1, parameters=role_assignment_params)
     role_assignment_2 = authorization_client.role_assignments.create(scope=scope, role_assignment_name = guid_str_2, parameters=role_assignment_params_2)
     role_assignment_3 = authorization_client.role_assignments.create(scope=scope, role_assignment_name = guid_str_3, parameters=role_assignment_params_3)
-    
+
+#Upload file to the Blob storage
 def upload_blob(storage_account):
     print("Upload any Document")
     path = input("Path for Document: ")
     account_url = "https://"+storage_account+".blob.core.windows.net/"
     
-    #Extracting username
+    #Extracting username for naming convention
     token_bytes = credential.get_token(account_url).token
     decoded_token = jwt.decode(token_bytes, options={"verify_signature": False})
     user_name = decoded_token.get("name")
@@ -109,9 +111,9 @@ def upload_blob(storage_account):
     dict = {"name" : user_name , "time" : date_time_string,"url":f"{blob_service_client.url}{container_name}/{document_name}"} 
     return (dict)
 
+#Create a Queue and upload the upload to the blob storage
 def queue_upload(storage_account,credential):
     #Queue client setup
-   
     queue_client= QueueClient(
         account_url= "https://"+storage_account+".queue.core.windows.net/", 
         queue_name = 'floating-queue' ,credential= credential )
@@ -123,7 +125,8 @@ def queue_upload(storage_account,credential):
         blob_data = upload_blob(storage_account)
         queue_client.send_message(blob_data)
         enqueue = input("Upload another file?")
-    
+
+#Dequeue to the table at the rate of 1 req/min by invoking job_processor 
 def dequeue(storage_account,credential,connection_string):
     #Get messsage off the queue
     table_client  = TableServiceClient.from_connection_string(conn_str=connection_string)
@@ -136,7 +139,7 @@ def dequeue(storage_account,credential,connection_string):
         if message != None: 
             job_processor(message,connection_string,table)
             queue_client.delete_message(message)
-        time.sleep(10)
+        time.sleep(60)
     queue_client.delete_queue()
 
 def job_processor(message,connection_string,table):
@@ -150,8 +153,6 @@ def job_processor(message,connection_string,table):
              'Blob_URL':data['url']
             }
     )
-
-    
 
 if __name__ == "__main__":
     #Setting up storage management client
