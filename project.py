@@ -14,11 +14,11 @@ import jwt
 import time
 
 #Creating a storage container with a unique name
-def create_storage_account_and_container():
+def create_storage_account_and_container(resource_group):
     #Checking the availability of the storage group name
     var= False
     while var != True:
-        Base_name = f'{'floatingnimbus'}{random.randint(1,100)}'
+        Base_name = f'{'mystorageaccount'}{random.randint(1,100)}'
         result = storage_client.storage_accounts.check_name_availability({'name':Base_name})
         var = result.name_available
 
@@ -42,7 +42,7 @@ def create_storage_account_and_container():
             "owner": "floating nimbus limited"}
                     }
     )
-    
+    role_assignment(storage_account)
     return storage_account
 
 #Assigning relevant roles to the storage account
@@ -155,17 +155,14 @@ def job_processor(message,connection_string,table):
     )
 
 if __name__ == "__main__":
+    subscription_id = input("Enter your subscription ID")
+    resource_group = input("Enter your resource group")
+    container_name = 'my-blob-container'
     #Setting up storage management client
-    
-    subscription_id = '4fc7f2dc-e142-4948-8d0f-a8a6c7d9c167'
-    resource_group = 'test-resource'
-    container_name = 'nimbus-blob-container'
-    
     credential = AzureCliCredential()
     storage_client = StorageManagementClient(credential,subscription_id)
-    #Create a storage account for Organisation floatonnimbus
-    storage_account = create_storage_account_and_container()
-    role_assignment(storage_account)
+    #Create a storage account for your Organisation 
+    storage_account = create_storage_account_and_container(resource_group)
     connection = input("enter key")
     connection_string = input("enter string")
     queue_upload(storage_account,connection)
