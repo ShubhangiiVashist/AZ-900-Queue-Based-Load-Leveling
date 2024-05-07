@@ -1,6 +1,6 @@
-# Your Resume API on Azure Serverless
+# Rate limiting - Queue-Based Load Leveling pattern in cloud
 
-Create an [API](https://learn.microsoft.com/training/modules/build-api-azure-functions/3-overview-api) with Azure Function that displays your resume information in json. 
+Implement a sample architecture to understand [Queue-Based Load Leveling pattern](https://shubhangivashist.medium.com/queue-based-load-leveling-pattern-in-cloud-hosted-applications-039b2ad8f378) in cloud
 
 ## Architecture 
 
