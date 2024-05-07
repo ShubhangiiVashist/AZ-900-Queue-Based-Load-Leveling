@@ -16,7 +16,7 @@ Implement a simple architecture using python SDK to understand the concept of [R
 
 - [Azure account](azure.com/free)
 - [GitHub account](github.com/join)
-- Prerequisite: Create a resource group if you don't have an existing one. 
+- Prerequisite: Create a resource group in your free subscription if you don't have an existing one. 
 
 For local developer environment
 
