@@ -1,30 +1,26 @@
 # Rate limiting - Queue-Based Load Leveling pattern in cloud
 
-Implement a sample architecture to understand [Queue-Based Load Leveling pattern](https://shubhangivashist.medium.com/queue-based-load-leveling-pattern-in-cloud-hosted-applications-039b2ad8f378) in cloud
+Implement a sample architecture to understand [Queue-Based Load Leveling pattern](https://shubhangivashist.medium.com/queue-based-load-leveling-pattern-in-cloud-hosted-applications-039b2ad8f378) leveraging Azure cloud platform. 
 
 ## Architecture 
 
 ![diagram](architecture.jpg)
 
 - GitHub for Version control.
-- Azure Blob Storage to store our resume.
-- Optional: [GitHub Codespaces](https://docs.github.com/en/codespaces/overview) as our development environment. 
-- [Python](https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/overview?tabs=bicep) for our Infrastructure as Code.
+- Azure Blob Storage to store our documents.
+- Azure Queue Storage to implement rate limiting.
+- Azure Table Storage to store documents and associated metadata. 
+- [Python](https://learn.microsoft.com/en-us/azure/developer/python/sdk/azure-sdk-overview) for our Infrastructure as Code.
 
 ## You'll need
 
 - [Azure account](azure.com/free)
 - [GitHub account](github.com/join)
-- I've provided a sample .json file based on the [Json resume](https://jsonresume.org/schema/)
 
 For local developer environment
 
 - VS Code
 - Docker
-- [VS Code Dev Container Extension](https://code.visualstudio.com/docs/devcontainers/tutorials)
-
-> **NOTE**
-> At the moment, GitHub Free for personal accounts comes with 15 GB of Codespaces storage and 120 Core hours per month. Read more about [pricing here](https://docs.github.com/billing/managing-billing-for-github-codespaces/about-billing-for-github-codespaces)
 
 ## How to get started
 
