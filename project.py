@@ -11,6 +11,7 @@ import ast
 import uuid
 import jwt
 import time
+import defaults
 
 #Creating a storage account with a unique name
 def create_storage_account_and_container(resource_group,credential,subscription_id):
@@ -26,7 +27,7 @@ def create_storage_account_and_container(resource_group,credential,subscription_
     #Creating storage group with a unique name
     poller = storage_client.storage_accounts.begin_create(
         resource_group_name = resource_group, account_name = Base_name , 
-        parameters = { 'location': 'eastus', 'kind': 'StorageV2' , 'sku' : {'name' : 'Standard_LRS'}
+        parameters = { 'location': defaults.DEFAULT_LOCATION , 'kind': 'StorageV2' , 'sku' : {'name' : 'Standard_LRS'}
                     }
     )
 
@@ -34,7 +35,7 @@ def create_storage_account_and_container(resource_group,credential,subscription_
     storage_account =  poller_Results.name
 
     #Creating a storage Container for blob
-    container_name = 'my-blob-container'
+    container_name = defaults.DEFAULT_CONTAINER_NAME
     containter = storage_client.blob_containers.create(
         resource_group_name = resource_group,
         account_name = storage_account,
@@ -62,7 +63,7 @@ def role_assignment(storage_account):
 
     #Setting up authorization management client
     authorization_client = AuthorizationManagementClient(credential, subscription_id)
-    principal_id = input("enter principle ID")  #principle_id is the object_id
+    principal_id = defaults.DEFAULT_PRINCIPLE_ID 
     scope = f"/subscriptions/{subscription_id}/resourceGroups/{resource_group}/providers/Microsoft.Storage/storageAccounts/{storage_account}"
 
     role_assignment_params = RoleAssignmentCreateParameters(
@@ -121,7 +122,7 @@ def queue_upload(storage_account,credential):
     #Queue client setup
     queue_client= QueueClient(
         account_url= "https://"+storage_account+".queue.core.windows.net/", 
-        queue_name = 'my-queue' ,credential= credential )
+        queue_name = defaults.DEFAULT_QUEUE_NAME ,credential= credential )
     #Create a Queue
     queue_client.create_queue()
     #Enqueue
@@ -135,10 +136,10 @@ def queue_upload(storage_account,credential):
 def dequeue(storage_account,credential,connection_string):
     #Get messsage off the queue
     table_client  = TableServiceClient.from_connection_string(conn_str=connection_string)
-    table = table_client.create_table(table_name = "Mytable01")
+    table = table_client.create_table(table_name = defaults.DEFAULT_TABLE_NAME)
     queue_client= QueueClient(
             account_url= "https://"+storage_account+".queue.core.windows.net/", 
-            queue_name = 'my-queue' ,credential= credential )
+                queue_name = defaults.DEFAULT_QUEUE_NAME ,credential= credential )
     while queue_client.get_queue_properties().approximate_message_count != 0:
         message = queue_client.receive_message()
         if message != None: 
@@ -160,8 +161,8 @@ def job_processor(message,connection_string,table):
     )
 
 if __name__ == "__main__":
-    subscription_id = input("Enter your subscription ID")
-    resource_group = input("Enter your resource group name")
+    subscription_id = defaults.DEFAULT_SUBSCRIPTION
+    resource_group = defaults.DEFAULT_RESOURCE_GROUP
 
     #Setting up credentials
     credential = AzureCliCredential()
@@ -172,4 +173,6 @@ if __name__ == "__main__":
     connection_string = input("enter string")
     queue_upload(storage_account,connection)
     dequeue(storage_account,connection,connection_string)
+    
+  
     
