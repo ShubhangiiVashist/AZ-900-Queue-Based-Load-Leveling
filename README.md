@@ -1,6 +1,15 @@
-# Rate limiting - Queue-Based Load Leveling pattern on cloud
+# Project for AZ-900 - Implement Queue-Based Load Leveling pattern
+
+Hi, my intention in developing these projects is to make learning enjoyable. By examining real-life implementations of cloud services, you can gain a deeper understanding of the concepts, making learning more engaging and aiding in better retention of the material, which is beneficial for passing the AZ-900 exam.
 
 Implement a simple architecture using python SDK to understand the concept of [Rate limiting (Queue-Based Load Leveling pattern)](https://shubhangivashist.medium.com/queue-based-load-leveling-pattern-in-cloud-hosted-applications-039b2ad8f378) leveraging Azure cloud platform.  
+
+## Azure Services that you will learn
+- Azure Storage
+- Azure Queue Service
+- Azure Blob Service
+- Azure Table Service
+- Access Control - Role assignment
 
 ## Architecture 
 
